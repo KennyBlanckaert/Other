@@ -1,6 +1,6 @@
 # Other
 
-`not all projects in here are available`
+`Some of these project are confidential`
 
 ## Packer
 
