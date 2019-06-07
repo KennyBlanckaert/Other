@@ -16,7 +16,7 @@ chomp(my $xml = <DATA>);
 
 ### STORE PLAYERS
 my $players = {};
-my %player_types = ();
+my %positions = ();
 while ($xml =~ m/<voetballer id="(?:.*?)" nationaliteit="(?<nationality>[A-Z]{3})">(?:.*?)<naam>(?<firstname>[A-Za-z\-]+?)(?<lastname>\s.*?)?<\/naam>(?:.*?)<positie>(?<position>.*?)<\/positie>(?:.*?)<werkgever naam="(?<employer>[A-Z]{3})">(?:\d+)<\/werkgever>(\s*.\s*)<\/werkgevers>(\s*.\s*)<\/voetballer>/gsmc) {
 	my $nationality = $+{nationality};
 	my $lastname = $+{lastname};
@@ -25,29 +25,31 @@ while ($xml =~ m/<voetballer id="(?:.*?)" nationaliteit="(?<nationality>[A-Z]{3}
 	my $employer = $+{employer};
 
 	$lastname =~ s/^\s+//;
-	$player_types{position}++;
+	$positions{$position}++;
 
-	say $nationality, " - ", $firstname, " - ", $lastname, " - ", $position;
+	# say $nationality, " - ", $firstname, " - ", $lastname, " - ", $position;
 	push( @{$players->{$employer}}, [ $nationality, $firstname, $lastname, $position ] );
 }
 
 say "";
 
-### STORE clubs
+### STORE CLUBS
 my $clubs = {};
 while ($xml =~ m/<club id="(?<club>[A-Z]{3})">(?:.*?)<naam>(?<name>.*?)<\/naam>(?:.*?)<capaciteit>(?<capacity>\d+)<\/capaciteit>(?:.*?)<\/club>/gcsm) {
 	my $club = $+{club};
 	my $name = $+{name};
 	my $capacity = $+{capacity};
 
-	say $club, " - ", $name, " - ", $capacity;
+	# say $club, " - ", $name, " - ", $capacity;
 	$clubs->{$club} = [ $name, $capacity ];
 }
 
 ### CREATE RECORDS
 my $records = [];
-my $title = [" ", "Doelman", "Verdediger", "Middenvelder", "Aanvaller", ["Belgie"], ["Europese Unie"], ["Buiten Europese Unie"], ["Afrika"], ["Ander"]];
-push(@{$records}, $title);
+my @positions = ( sort keys %positions );
+my @origins = ( map { [ $_ ] } sort keys %landcodes, "Overige" );
+my $titles = [" ", @positions, @origins ];
+push(@{$records}, $titles);
 
 foreach my $club (sort { $clubs->{$b}->[1] <=> $clubs->{$a}->[1] || $clubs->{$a}->[0] cmp $clubs->{$b}->[0] } keys %{$clubs}) {
 	
@@ -55,34 +57,32 @@ foreach my $club (sort { $clubs->{$b}->[1] <=> $clubs->{$a}->[1] || $clubs->{$a}
 	my $club_name = $clubs->{$club}->[0];
 
 	# player counts
-	my $attackers = 0;
-	my $mid_fielders = 0;
-	my $defenders = 0;
-	my $keepers = 0;
+	my %counts = map { $_ => 0 } keys %positions;
 
 	# origins
-	my $belgium = [];
-	my $europian_union = [];
-	my $europe_outside_europian_union = [];
-	my $africa = [];
-  	my $other = [];
+	my %origins = map { $_ => [ ] } keys %landcodes;
+	$origins{"Overige"} = [];
 
+	# add
 	foreach my $player (sort { $a->[2] cmp $b->[2] } @{$players->{$club}}) {
-
-		$attackers++ if $player->[3] eq "Aanvaller";
-		$mid_fielders++ if $player->[3] eq "Middenvelder";
-		$defenders++ if $player->[3] eq "Verdediger";
-		$keepers++ if $player->[3] eq "Doelman";
-
 		my $nationality = $player->[0];
-		if ($player->[0] eq "BEL") 												{ push(@{$belgium}, $player->[1] . " " . $player->[2]); }
-		elsif (grep(/^$nationality$/, @{$landcodes{"Europese Unie"}}))  		{ push(@{$europian_union}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
-		elsif (grep(/^$nationality$/, @{$landcodes{"Europa buiten EU"}}))  		{ push(@{$europe_outside_europian_union}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
-		elsif (grep(/^$nationality$/, @{$landcodes{"Afrika"}}))  				{ push(@{$africa}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
-		else 																	{ push(@{$other}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
+
+		$counts{$player->[3]}++;
+
+		if ($player->[0] eq "BEL") 												{ push(@{$origins{"Belgie"}}, $player->[1] . " " . $player->[2]); }
+		elsif (grep(/^$nationality$/, @{$landcodes{"Europese Unie"}}))  		{ push(@{$origins{"Europese Unie"}}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
+		elsif (grep(/^$nationality$/, @{$landcodes{"Europa buiten EU"}}))  		{ push(@{$origins{"Europa buiten EU"}}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
+		elsif (grep(/^$nationality$/, @{$landcodes{"Afrika"}}))  				{ push(@{$origins{"Afrika"}}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
+		else 																	{ push(@{$origins{"Overige"}}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
 	}
 
-	push(@{$records}, [ $club_name, $keepers, $defenders, $mid_fielders, $attackers, $belgium, $europian_union, $europe_outside_europian_union, $africa, $other ]);
+	@counts = ();
+	push(@counts, $counts{$_}) foreach sort keys %counts;
+
+	@origins = ();
+	push(@origins, $origins{$_}) foreach sort keys %origins;
+
+	push(@{$records}, [ $club_name, @counts, @origins ]);
 }
 
 # CREATE HTML TABLE
