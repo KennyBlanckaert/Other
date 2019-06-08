@@ -19,19 +19,15 @@ my $players = {};
 my %positions = ();
 while ($xml =~ m/<voetballer id="(?:.*?)" nationaliteit="(?<nationality>[A-Z]{3})">(?:.*?)<naam>(?<firstname>[A-Za-z\-]+?)(?<lastname>\s.*?)?<\/naam>(?:.*?)<positie>(?<position>.*?)<\/positie>(?:.*?)<werkgever naam="(?<employer>[A-Z]{3})">(?:\d+)<\/werkgever>(\s*.\s*)<\/werkgevers>(\s*.\s*)<\/voetballer>/gsmc) {
 	my $nationality = $+{nationality};
-	my $lastname = $+{lastname};
 	my $firstname = $+{firstname};
 	my $position = $+{position};
 	my $employer = $+{employer};
+  (my $lastname = $+{lastname}) =~ s/^\s+//;
 
-	$lastname =~ s/^\s+//;
 	$positions{$position}++;
 
-	# say $nationality, " - ", $firstname, " - ", $lastname, " - ", $position;
 	push( @{$players->{$employer}}, [ $nationality, $firstname, $lastname, $position ] );
 }
-
-say "";
 
 ### STORE CLUBS
 my $clubs = {};
@@ -40,7 +36,6 @@ while ($xml =~ m/<club id="(?<club>[A-Z]{3})">(?:.*?)<naam>(?<name>.*?)<\/naam>(
 	my $name = $+{name};
 	my $capacity = $+{capacity};
 
-	# say $club, " - ", $name, " - ", $capacity;
 	$clubs->{$club} = [ $name, $capacity ];
 }
 
@@ -48,9 +43,8 @@ while ($xml =~ m/<club id="(?<club>[A-Z]{3})">(?:.*?)<naam>(?<name>.*?)<\/naam>(
 my $records = [];
 my @positions = ( sort keys %positions );
 my @origins = ( map { [ $_ ] } sort keys %landcodes, "Overige" );
-my $titles = [" ", @positions, @origins ];
+my $titles = ["CLUB", @positions, @origins ];
 push(@{$records}, $titles);
-
 foreach my $club (sort { $clubs->{$b}->[1] <=> $clubs->{$a}->[1] || $clubs->{$a}->[0] cmp $clubs->{$b}->[0] } keys %{$clubs}) {
 	
 	# club name
@@ -59,28 +53,26 @@ foreach my $club (sort { $clubs->{$b}->[1] <=> $clubs->{$a}->[1] || $clubs->{$a}
 	# player counts
 	my %counts = map { $_ => 0 } keys %positions;
 
-	# origins
+	# players / origin
 	my %origins = map { $_ => [ ] } keys %landcodes;
 	$origins{"Overige"} = [];
 
-	# add
+	# find
 	foreach my $player (sort { $a->[2] cmp $b->[2] } @{$players->{$club}}) {
 		my $nationality = $player->[0];
 
 		$counts{$player->[3]}++;
 
-		if ($player->[0] eq "BEL") 												{ push(@{$origins{"Belgie"}}, $player->[1] . " " . $player->[2]); }
+		if ($player->[0] eq "BEL") 												                  { push(@{$origins{"Belgie"}}, $player->[1] . " " . $player->[2]); }
 		elsif (grep(/^$nationality$/, @{$landcodes{"Europese Unie"}}))  		{ push(@{$origins{"Europese Unie"}}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
-		elsif (grep(/^$nationality$/, @{$landcodes{"Europa buiten EU"}}))  		{ push(@{$origins{"Europa buiten EU"}}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
-		elsif (grep(/^$nationality$/, @{$landcodes{"Afrika"}}))  				{ push(@{$origins{"Afrika"}}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
-		else 																	{ push(@{$origins{"Overige"}}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
+		elsif (grep(/^$nationality$/, @{$landcodes{"Europa buiten EU"}}))  	{ push(@{$origins{"Europa buiten EU"}}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
+		elsif (grep(/^$nationality$/, @{$landcodes{"Afrika"}}))  			    	{ push(@{$origins{"Afrika"}}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
+		else 																	                              { push(@{$origins{"Overige"}}, $player->[1] . " " . $player->[2] . " (" . $player->[0] . ") "); }
 	}
 
-	@counts = ();
-	push(@counts, $counts{$_}) foreach sort keys %counts;
-
-	@origins = ();
-	push(@origins, $origins{$_}) foreach sort keys %origins;
+  # results
+	my @counts = map { $counts{$_} } sort keys %counts;
+	my @origins = map { $origins{$_} } sort keys %origins;
 
 	push(@{$records}, [ $club_name, @counts, @origins ]);
 }
