@@ -2,9 +2,10 @@ use v5.10;
 # use strict;
 # use warnings;
 
-### SETTINGS
-my $found = 0;
+### DEBUGGING
 my $print = 0;
+my $found = 0;
+my $not_found = 1;
 
 ### FUNCTIONS
 sub convert_installs {
@@ -25,12 +26,11 @@ close(FILE);
 my @columns = split /,/, $lines[0];
 my $len = @columns;
 
-my $found = 0;
 my %apps = ();
 for (my $i = 1; $i <= $#lines; $i++) {
     my $line = $lines[$i];
 
-    if ($line =~ m/"?(.*)"?,([A-Z_]+),(.*?),(.*?),(.*?),"(.*)",(.*?),(.*?),(.*?),(.*?),"(.*?)",(.*?),(.*)/) {
+    if ($line =~ m/"?(.*)"?,([A-Z_]+),(.*?),(.*?),(.*?),"?([^"]+)"?,(.*?),(.*?),(.*?),(.*?),"(.*?)",(.*?),(.*)/) {
         $apps{$1}->{$columns[1]} = $2;
         $apps{$1}->{$columns[2]} = $3;
         $apps{$1}->{$columns[3]} = $4;
@@ -46,9 +46,14 @@ for (my $i = 1; $i <= $#lines; $i++) {
 
         $found++;
     }
+    # debugging purpose
+    else {
+        say "[", $not_found, "] ", $line;
+        $not_found++;
+    }
 }
 
-### PRINT
+## PRINT
 if ($print) {
     say $found;
     say "";
