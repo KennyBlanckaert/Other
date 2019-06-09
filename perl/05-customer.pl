@@ -15,26 +15,27 @@ my %segments = ();
 ### PROCESS
 while ($file =~ m/<T>(?<content>.*?<\/T>)/gsmc) {
     my $segment;
+    my $name;
     my $element = $+{content};
 
     if ($element =~ m/<C_MKTSEGMENT>(?<segment>.*?)<\/C_MKTSEGMENT>/) {
         $segment = lc($+{segment});
-        $segments{$segment}->[0]++;
     }
 
     if ($element =~ m/<C_NAME>(?<name>.*?)<\/C_NAME>/) {
-        my $name = $+{name};
-        push( @{$segments{$segment}->[1]}, $name);
+        $name = $+{name};
     }
 
     $total++;
+    $segments{$segment}->[0]++;
+    push( @{$segments{$segment}->[1]}, $name);
 }
 say "There are ", $total, " customers: \n";
 
 ### PERCENTAGES
 my @headers = ();
 my $maximum = 0;
-foreach my $segment (keys %segments) {
+foreach my $segment (sort keys %segments) {
     my $percentage = sprintf("%.1f", $segments{$segment}->[0] / $total * 100);
     
     $maximum = $segments{$segment}->[0] if ($segments{$segment}->[0] > $maximum);
@@ -42,13 +43,13 @@ foreach my $segment (keys %segments) {
     push(@headers, sprintf("%-25s", "[ " . $percentage . "% " . $segment . " ]"));
 }
 say "\t" . join(" " x 10, @headers);
-say;
+say "";
 
 # LIST
 for (my $i = 0; $i < $maximum; $i++) {
     
     my @row = ();
-    foreach my $segment (keys %segments) {
+    foreach my $segment (sort keys %segments) {
         if ($segments{$segment}->[0] > $i) {
             push(@row, sprintf("%-25s", $segments{$segment}->[1]->[$i]));
         }
