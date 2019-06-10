@@ -107,7 +107,7 @@ my $html = <<"CONTENT";
 CONTENT
 
 ## SAVE HTML PAGE
-open(FILE, ">", "./output/index.html");
+open(FILE, ">", "./output/football.html");
 say FILE $html;
 close(FILE);
 
