@@ -1,16 +1,17 @@
 # Other
 
-`Some of these project are confidential`
+&nbsp;
 
 ## Packer
 
-## Vagrant
+## Perl
 
 ## Puppet 
 
 ## Ruby
 
-## Perl
+## Vagrant
+
 
 
 
