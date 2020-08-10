@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/webservice/controllers"
+	"github.com/KennyBlanckaert/Other/tree/master/go/webservice/controllers"
 )
 
 // Main function

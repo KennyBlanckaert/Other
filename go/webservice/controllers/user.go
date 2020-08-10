@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/webservice/models"
+	"github.com/KennyBlanckaert/Other/tree/master/go/webservice/models"
 )
 
 type userController struct {
@@ -29,7 +29,6 @@ func (uc *userController) parseRequest(request *http.Request) (models.User, erro
 		return models.User{}, err
 	}
 
-	fmt.Println("User:", user)
 	return user, nil
 }
 
@@ -45,6 +44,22 @@ func (uc *userController) post(writer http.ResponseWriter, request *http.Request
 	}
 
 	user, err = models.AddUser(user)
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write([]byte(err.Error()))
+	}
+
+	encodeResponseAsJSON(user, writer)
+}
+
+func (uc *userController) put(writer http.ResponseWriter, request *http.Request) {
+	user, err := uc.parseRequest(request)
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write([]byte("Could not parse User object"))
+	}
+
+	user, err = models.UpdateUser(user)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		writer.Write([]byte(err.Error()))
@@ -77,6 +92,9 @@ func (uc userController) ServeHTTP(writer http.ResponseWriter, request *http.Req
 
 	case http.MethodPost:
 		uc.post(writer, request)
+
+	case http.MethodPut:
+		uc.put(writer, request)
 
 	case http.MethodDelete:
 		uc.delete(writer, request)

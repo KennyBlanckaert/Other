@@ -1,9 +1,8 @@
 package models
 
+import "errors"
+
 // Imports
-import (
-	"reflect"
-)
 
 // User Object
 // MUST be capitalized for the JSON decoder
@@ -22,17 +21,6 @@ var (
 // GetUsers - return: Array of pointer (type User)
 func GetUsers() []*User {
 	return users
-}
-
-// GetUserByID - return: pointer (type User)
-func GetUserByID(id int) *User {
-	for _, user := range users {
-		if user.ID == id {
-			return user
-		}
-	}
-
-	return nil
 }
 
 // AddUser - return: pointer (type User)
@@ -56,10 +44,24 @@ func RemoveUser(user User) (User, error) {
 	return user, nil
 }
 
+// UpdateUser - return: pointer (type User)
+func UpdateUser(user User) (User, error) {
+	index := GetUserIndex(&user)
+
+	if index == -1 {
+		return User{}, errors.New("user not found")
+	}
+
+	users[index].Firstname = user.Firstname
+	users[index].Lastname = user.Lastname
+
+	return *users[index], nil
+}
+
 // GetUserIndex - return: index as integer
 func GetUserIndex(user *User) int {
 	for i := 0; i < len(users); i++ {
-		if reflect.DeepEqual(user, *(users[i])) {
+		if users[i].ID == user.ID {
 			return i
 		}
 	}
