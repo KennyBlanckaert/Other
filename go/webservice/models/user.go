@@ -39,6 +39,7 @@ func RemoveUser(user User) (User, error) {
 	last := len(users) - 1
 
 	*users[index] = *users[last]
+	users = append(users[:index], users[index:]...)
 	users = users[:last]
 
 	return user, nil
