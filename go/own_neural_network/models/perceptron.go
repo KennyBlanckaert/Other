@@ -23,14 +23,14 @@ func (p *Perceptron) Initialize() {
 
 	p.Bias = 0.0
 	p.Weights = make([]float64, len(p.Input[0]))
-	for i := 0; i < len(p.Input[0]); i++ { // random weights
+	for i := 0; i < len(p.Input[0]); i++ { 		// random weights
 		p.Weights[i] = rand.Float64()
 	}
 }
 
 // ForwardPropagation - return: float64
 func (p *Perceptron) ForwardPropagation(x []float64) float64 {
-	return p.sigmoid(utils.DotProduct(x, p.Weights) + p.Bias)
+	return p.sigmoid(utils.DotProduct(x, p.Weights) + p.Bias)		// y = sigmoid(weight * x + bias)
 }
 
 // Train - return: nil
