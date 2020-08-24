@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/KennyBlanckaert/Other/tree/master/go/neural_network/utils"
+	"github.com/KennyBlanckaert/Other/tree/master/go/own_neural_network/utils"
 )
 
 // Perceptron Object

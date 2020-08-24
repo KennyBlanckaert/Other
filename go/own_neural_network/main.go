@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/KennyBlanckaert/Other/tree/master/go/neural_network/models"
+	"github.com/KennyBlanckaert/Other/tree/master/go/own_neural_network/models"
 )
 
 // Main function

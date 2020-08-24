@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/KennyBlanckaert/Other/tree/master/go/webservice/models"
+	"github.com/KennyBlanckaert/Other/tree/master/go/simple_webservice/models"
 )
 
 type userController struct {
