@@ -5,5 +5,7 @@ type User struct {
 	ID			int
 	Firstname 	string
 	Lastname 	string	
-	Address		string
+	Street		string
+	Number		int
+	City		string
 }

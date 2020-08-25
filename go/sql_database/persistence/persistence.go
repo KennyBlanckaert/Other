@@ -22,7 +22,7 @@ func Connect(username string, password string, host string, port string, databas
 }
 
 func GetUsers() []models.User {
-	query := `SELECT * FROM user`
+	query := `SELECT * FROM users`
 
 	rows, err := db.Query(query)
 	defer rows.Close()
@@ -32,9 +32,11 @@ func GetUsers() []models.User {
 		var id int
 		var firstname string
 		var lastname string
-		var address string
+		var street string
+		var number int
+		var city string
 
-		err = rows.Scan(&id, &firstname, &lastname, &address)
+		err = rows.Scan(&id, &firstname, &lastname, &street, &number, &city)
 		if err != nil {
 			continue
 		}
@@ -43,7 +45,9 @@ func GetUsers() []models.User {
 			ID: id,
 			Firstname: firstname,
 			Lastname: lastname,
-			Address: address,
+			Street: street,
+			Number:	number,
+			City: city,
 		}
 		users = append(users, user)
 	}
@@ -51,8 +55,29 @@ func GetUsers() []models.User {
 	return users
 }
 
-func GetUserById(id int) *models.User {
-	return nil
+func GetUserById(index int) models.User {
+	query := "SELECT * FROM users WHERE id = ?"
+
+	row := db.QueryRow(query, index)
+
+	var id int
+	var firstname string
+	var lastname string
+	var street string
+	var number int
+	var city string
+
+	row.Scan(&id, &firstname, &lastname, &street, &number, &city)
+	user := models.User{
+		ID: id,
+		Firstname: firstname,
+		Lastname: lastname,
+		Street: street,
+		Number: number,
+		City: city,
+	}
+
+	return user
 }
 
 func RemoveUser(id int) error {

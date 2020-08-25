@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	persistence.Connect("<username>", "<password>", "<host>", "3306", "test")
-	fmt.Println(persistence.GetUsers())
+	persistence.Connect("<host>", "<password>", "<host>", "3306", "test")
+	fmt.Println(persistence.GetUserById(1))
 }
