@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"fmt"
+	"errors"
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -81,9 +82,33 @@ func GetUserById(index int) models.User {
 }
 
 func RemoveUser(id int) error {
-	return nil
+	query := "DELETE FROM users WHERE id = ?"
+
+	stmt, err := db.Prepare(query)
+	if err == nil {
+
+		_, err := stmt.Exec(id)
+		if err == nil {
+		   return nil
+		}
+	}
+
+	return errors.New("Delete operation failed.")
 }
 
 func AddUser(user models.User) error {
-	return nil
+	query := "INSERT INTO users (firstname, lastname, street, number, city) VALUES (?, ?, ?, ?, ?)"
+
+	stmt, err := db.Prepare(query)
+	if err == nil {
+
+		_, err := stmt.Exec(user.Firstname, user.Lastname, user.Street, user.Number, user.City)
+		if err == nil {
+		   return nil
+		}
+
+		return err
+	}
+
+	return err
 }
