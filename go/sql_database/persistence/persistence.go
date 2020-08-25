@@ -21,12 +21,13 @@ func Connect(username string, password string, host string, port string, databas
 	}
 }
 
-func GetUsers() {
+func GetUsers() []models.User {
 	query := `SELECT * FROM user`
 
 	rows, err := db.Query(query)
 	defer rows.Close()
 
+	users := []models.User{}
 	for rows.Next() {
 		var id int
 		var firstname string
@@ -34,24 +35,30 @@ func GetUsers() {
 		var address string
 
 		err = rows.Scan(&id, &firstname, &lastname, &address)
+		if err != nil {
+			continue
+		}
 
-		fmt.Println(id, firstname, lastname, address)
+		user := models.User{
+			ID: id,
+			Firstname: firstname,
+			Lastname: lastname,
+			Address: address,
+		}
+		users = append(users, user)
 	}
 
-	err = rows.Err()
-	if err != nil {
-		panic(err)
-	}
+	return users
 }
 
-func GetUserById(id int) {
-
+func GetUserById(id int) *models.User {
+	return nil
 }
 
-func RemoveUser(id int) {
-
+func RemoveUser(id int) error {
+	return nil
 }
 
-func AddUser(user models.User) {
-
+func AddUser(user models.User) error {
+	return nil
 }
